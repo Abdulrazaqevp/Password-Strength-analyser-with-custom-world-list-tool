@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Password Security Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function showTab(tabId) {
+            document.getElementById("analyzer").style.display = "none";
+            document.getElementById("generator").style.display = "none";
+            document.getElementById(tabId).style.display = "block";
+        }
+
+        function togglePassword(btn) {
+            const field = document.getElementById("passwordField");
+            if (field.type === "password") {
+                field.type = "text";
+                btn.innerText = "Hide";
+            } else {
+                field.type = "password";
+                btn.innerText = "Show";
+            }
+        }
+
+        window.onload = function () {
+            showTab("{{ active_tab }}");
+        };
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h2>Password Security Tool</h2>
+
+    <!-- ================= ANALYZER ================= -->
+    <div id="analyzer">
+
+        <form method="post">
+            <input type="hidden" name="action" value="analyze">
+
+            <label>Enter Password</label>
+
+            <div class="password-box">
+                <input type="password" name="password" id="passwordField" required>
+                <button type="button" class="toggle-btn"
+                        onclick="togglePassword(this)">Show</button>
+            </div>
+
+            <button type="submit" class="primary-btn">
+                Analyze Password
+            </button>
+        </form>
+
+        <button type="button"
+                class="secondary-btn"
+                onclick="showTab('generator')">
+            Go to Wordlist Generator
+        </button>
+
+        {% if result %}
+        <div class="result 
+            {% if result.score <= 1 %}weak
+            {% elif result.score == 2 %}medium
+            {% else %}strong{% endif %}
+        ">
+            <h3>Result</h3>
+            <p><b>Score:</b> {{ result.score }}/4</p>
+            <p><b>Crack Time:</b> {{ result.crack_time }}</p>
+
+            {% if result.suggestions %}
+            <b>Suggestions:</b>
+            <ul>
+                {% for s in result.suggestions %}
+                    <li>{{ s }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ================= GENERATOR ================= -->
+    <div id="generator" style="display:none;">
+
+        <button type="button"
+                class="secondary-btn"
+                onclick="showTab('analyzer')">
+            ← Back to Analyzer
+        </button>
+
+        <form method="post" autocomplete="off">
+
+            <label>Custom Wordlist Generator</label>
+
+            <input name="name" placeholder="Name">
+            <input name="nickname" placeholder="Nickname">
+            <input name="pet" placeholder="Pet Name">
+            <input name="year" placeholder="Birth Year">
+            <input name="favorite" placeholder="Favorite Word">
+
+            <button name="action" value="preview" class="primary-btn">
+                Preview Wordlist
+            </button>
+
+            <button name="action" value="download" class="secondary-btn">
+                Download Wordlist
+            </button>
+        </form>
+
+        {% if preview %}
+        <div class="result">
+            <h3>Wordlist Preview (First 20)</h3>
+            <ul>
+                {% for w in preview %}
+                    <li>{{ w }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
